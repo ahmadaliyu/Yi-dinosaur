@@ -220,3 +220,59 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 50%;
   animation: pulse 1.5s infinite;
 }
+
+/* Solana Wallet Adapter Modal Overrides */
+.wallet-adapter-modal-wrapper {
+  background: rgba(10, 10, 15, 0.95) !important;
+  backdrop-filter: blur(20px);
+}
+
+.wallet-adapter-modal-container {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 24px !important;
+}
+
+.wallet-adapter-modal-title {
+  font-family: 'Orbitron', sans-serif !important;
+  color: var(--text) !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 !important;
+}
+
+.wallet-adapter-modal-list li {
+  margin: 0 !important;
+}
+
+.wallet-adapter-button {
+  background: var(--bg-card-hover) !important;
+  color: var(--text) !important;
+  border-radius: 12px !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.3s ease !important;
+}
+
+.wallet-adapter-button:hover {
+  background: rgba(0, 255, 136, 0.1) !important;
+  border-color: var(--primary) !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: var(--gradient-primary) !important;
+  color: var(--bg-dark) !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: var(--bg-card-hover) !important;
+  color: var(--text) !important;
+}
+
+.wallet-adapter-modal-button-close:hover {
+  background: rgba(255, 107, 107, 0.2) !important;
+}
+
+.wallet-adapter-collapse-button {
+  color: var(--primary) !important;
+}

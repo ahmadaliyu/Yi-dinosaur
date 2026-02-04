@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, Wallet } from 'lucide-react';
+import { Menu, X, Wallet, ChevronDown } from 'lucide-react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const { publicKey, connected, disconnect, wallet } = useWallet();
+  const { setVisible } = useWalletModal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,18 +29,23 @@ const Navbar = () => {
     { name: 'Partners', href: '#partners' },
   ];
 
-  const connectWallet = async () => {
-    try {
-      if (window.solana && window.solana.isPhantom) {
-        const response = await window.solana.connect();
-        console.log('Connected:', response.publicKey.toString());
-        setWalletConnected(true);
-      } else {
-        window.open('https://phantom.app/', '_blank');
-      }
-    } catch (err) {
-      console.error('Connection failed:', err);
+  const handleConnectClick = () => {
+    if (connected) {
+      setShowDropdown(!showDropdown);
+    } else {
+      setVisible(true);
     }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    setShowDropdown(false);
+  };
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    const str = address.toString();
+    return `${str.slice(0, 4)}...${str.slice(-4)}`;
   };
 
   return (
@@ -72,10 +82,66 @@ const Navbar = () => {
             <span className="network-dot"></span>
             Solana
           </div>
-          <button className="wallet-btn" onClick={connectWallet}>
-            <Wallet size={18} />
-            {walletConnected ? 'Connected' : 'Connect Wallet'}
-          </button>
+          
+          <div className="wallet-container">
+            <button className="wallet-btn" onClick={handleConnectClick}>
+              {connected && wallet ? (
+                <>
+                  <img 
+                    src={wallet.adapter.icon} 
+                    alt={wallet.adapter.name} 
+                    className="wallet-icon"
+                  />
+                  {formatAddress(publicKey)}
+                  <ChevronDown size={16} />
+                </>
+              ) : (
+                <>
+                  <Wallet size={18} />
+                  Connect Wallet
+                </>
+              )}
+            </button>
+            
+            {showDropdown && connected && (
+              <div className="wallet-dropdown">
+                <div className="dropdown-header">
+                  <img 
+                    src={wallet?.adapter.icon} 
+                    alt={wallet?.adapter.name} 
+                    className="dropdown-wallet-icon"
+                  />
+                  <div className="dropdown-info">
+                    <span className="dropdown-wallet-name">{wallet?.adapter.name}</span>
+                    <span className="dropdown-address">{formatAddress(publicKey)}</span>
+                  </div>
+                </div>
+                <div className="dropdown-divider"></div>
+                <button 
+                  className="dropdown-item"
+                  onClick={() => {
+                    navigator.clipboard.writeText(publicKey?.toString() || '');
+                    setShowDropdown(false);
+                  }}
+                >
+                  📋 Copy Address
+                </button>
+                <button 
+                  className="dropdown-item"
+                  onClick={() => setVisible(true)}
+                >
+                  🔄 Change Wallet
+                </button>
+                <button 
+                  className="dropdown-item disconnect"
+                  onClick={handleDisconnect}
+                >
+                  🚪 Disconnect
+                </button>
+              </div>
+            )}
+          </div>
+
           <button 
             className="mobile-toggle"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
