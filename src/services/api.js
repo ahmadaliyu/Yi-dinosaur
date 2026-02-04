@@ -4,7 +4,7 @@
 const API_CONFIG = {
   // Add your API keys in .env file
   COINGECKO_BASE: 'https://api.coingecko.com/api/v3',
-  DEXSCREENER_BASE: 'https://api.dexscreener.com/latest',
+  DEXSCREENER_BASE: 'https://api.dexscreener.com',
   SOLANA_RPC: import.meta.env.VITE_SOLANA_RPC || 'https://api.mainnet-beta.solana.com',
   
   // Your $Yi token addresses (update these with real addresses)
@@ -51,13 +51,39 @@ export const fetchCoinGeckoData = async (coinId = 'solana') => {
 // ============================================
 // DEXSCREENER - DEX Trading Data (FREE)
 // ============================================
-export const fetchDexScreenerData = async (pairAddress) => {
+
+// Get latest token profiles (trending tokens)
+export const fetchLatestTokenProfiles = async () => {
   try {
-    const address = pairAddress || API_CONFIG.YI_PAIR_ADDRESS;
+    const response = await fetch(
+      `${API_CONFIG.DEXSCREENER_BASE}/token-profiles/latest/v1`
+    );
+    
+    if (!response.ok) throw new Error('DexScreener API error');
+    
+    const data = await response.json();
+    
+    // Returns array of token profiles with icon, header, description, links
+    return data;
+  } catch (error) {
+    console.error('DexScreener token profiles error:', error);
+    return null;
+  }
+};
+
+// Get token data by address (price, volume, liquidity)
+export const fetchDexScreenerData = async (tokenAddress) => {
+  try {
+    const address = tokenAddress || API_CONFIG.YI_TOKEN_MINT;
+    
+    if (address === 'YOUR_YI_TOKEN_MINT_ADDRESS') {
+      console.warn('Please set your $Yi token mint address in .env');
+      return null;
+    }
     
     // Search by token address on Solana
     const response = await fetch(
-      `${API_CONFIG.DEXSCREENER_BASE}/dex/tokens/${address}`
+      `${API_CONFIG.DEXSCREENER_BASE}/latest/dex/tokens/${address}`
     );
     
     if (!response.ok) throw new Error('DexScreener API error');
@@ -69,20 +95,68 @@ export const fetchDexScreenerData = async (pairAddress) => {
     
     return {
       price: parseFloat(pair.priceUsd) || 0,
+      priceNative: parseFloat(pair.priceNative) || 0,
       priceChange24h: pair.priceChange?.h24 || 0,
+      priceChange6h: pair.priceChange?.h6 || 0,
       priceChange1h: pair.priceChange?.h1 || 0,
+      priceChange5m: pair.priceChange?.m5 || 0,
       volume24h: pair.volume?.h24 || 0,
+      volume6h: pair.volume?.h6 || 0,
+      volume1h: pair.volume?.h1 || 0,
       liquidity: pair.liquidity?.usd || 0,
+      liquidityBase: pair.liquidity?.base || 0,
+      liquidityQuote: pair.liquidity?.quote || 0,
       txns24h: (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0),
       buys24h: pair.txns?.h24?.buys || 0,
       sells24h: pair.txns?.h24?.sells || 0,
+      txns1h: (pair.txns?.h1?.buys || 0) + (pair.txns?.h1?.sells || 0),
       fdv: pair.fdv || 0,
+      marketCap: pair.marketCap || pair.fdv || 0,
       pairAddress: pair.pairAddress,
+      pairCreatedAt: pair.pairCreatedAt,
       dexId: pair.dexId,
+      chainId: pair.chainId,
+      baseToken: pair.baseToken,
+      quoteToken: pair.quoteToken,
+      info: pair.info, // Contains imageUrl, websites, socials
     };
   } catch (error) {
     console.error('DexScreener fetch error:', error);
     return null;
+  }
+};
+
+// Get pair data by pair address
+export const fetchDexScreenerPair = async (pairAddress) => {
+  try {
+    const response = await fetch(
+      `${API_CONFIG.DEXSCREENER_BASE}/latest/dex/pairs/solana/${pairAddress}`
+    );
+    
+    if (!response.ok) throw new Error('DexScreener API error');
+    
+    const data = await response.json();
+    return data.pair || null;
+  } catch (error) {
+    console.error('DexScreener pair fetch error:', error);
+    return null;
+  }
+};
+
+// Search tokens by query
+export const searchDexScreener = async (query) => {
+  try {
+    const response = await fetch(
+      `${API_CONFIG.DEXSCREENER_BASE}/latest/dex/search?q=${encodeURIComponent(query)}`
+    );
+    
+    if (!response.ok) throw new Error('DexScreener API error');
+    
+    const data = await response.json();
+    return data.pairs || [];
+  } catch (error) {
+    console.error('DexScreener search error:', error);
+    return [];
   }
 };
 
@@ -240,7 +314,10 @@ export const createDexScreenerWebSocket = (pairAddress, onUpdate) => {
 
 export default {
   fetchCoinGeckoData,
+  fetchLatestTokenProfiles,
   fetchDexScreenerData,
+  fetchDexScreenerPair,
+  searchDexScreener,
   fetchSolanaTokenData,
   fetchTwitterData,
   fetchTelegramData,
