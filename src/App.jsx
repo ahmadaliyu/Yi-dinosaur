@@ -2,6 +2,7 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Stats from './components/Stats'
 import Token from './components/Token'
+import WalletTracker from './components/WalletTracker'
 import Community from './components/Community'
 import Partners from './components/Partners'
 import Footer from './components/Footer'
@@ -16,6 +17,7 @@ function App() {
         <Hero />
         <Stats />
         <Token />
+        <WalletTracker />
         <Community />
         <Partners />
       </main>

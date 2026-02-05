@@ -24,6 +24,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Stats', href: '#stats' },
     { name: 'Token', href: '#token' },
+    { name: 'Tracker', href: '#tracker' },
     { name: 'Community', href: '#community' },
     { name: 'Partners', href: '#partners' },
   ];

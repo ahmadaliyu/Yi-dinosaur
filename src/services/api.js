@@ -15,6 +15,34 @@ const API_CONFIG = {
   TWITTER_BEARER_TOKEN: import.meta.env.VITE_TWITTER_BEARER_TOKEN,
   TELEGRAM_BOT_TOKEN: import.meta.env.VITE_TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: import.meta.env.VITE_TELEGRAM_CHAT_ID,
+  SOLSCAN_PUBLIC_BASE: 'https://public-api.solscan.io',
+  SOLSCAN_PRO_BASE: import.meta.env.VITE_SOLSCAN_PRO_BASE || 'https://pro-api.solscan.io',
+  SOLSCAN_KEY: import.meta.env.VITE_SOLSCAN_API_KEY,
+};
+
+// Helper to call Solscan public API
+const solscanPublicFetch = async (path, params = {}) => {
+  const url = new URL(`${API_CONFIG.SOLSCAN_PUBLIC_BASE}/${path}`);
+  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+  try {
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error('Solscan public API error');
+    return await res.json();
+  } catch (err) {
+    console.error('Solscan public fetch error:', err);
+    return null;
+  }
+};
+
+// Public endpoints
+export const fetchPublicChainInfo = async () => {
+  return await solscanPublicFetch('chaininfo');
+};
+
+export const fetchPublicAccountDetail = async (address) => {
+  if (!address) return null;
+  // public API mirrors some pro endpoints but may differ; try v2 account detail
+  return await solscanPublicFetch('account/detail', { address });
 };
 
 // ============================================
