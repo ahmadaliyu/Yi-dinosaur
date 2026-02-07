@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, Wallet, ChevronDown } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -22,11 +23,11 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Stats', href: '#stats' },
-    { name: 'Token', href: '#token' },
-    { name: 'Tracker', href: '#tracker' },
-    { name: 'Community', href: '#community' },
-    { name: 'Partners', href: '#partners' },
+    { name: 'Stats', to: '/stats' },
+    { name: 'Token', to: '/token' },
+    { name: 'Tracker', to: '/tracker' },
+    { name: 'Community', to: '/community' },
+    { name: 'Partners', to: '/partners' },
   ];
 
   const handleConnectClick = () => {
@@ -56,26 +57,29 @@ const Navbar = () => {
       transition={{ duration: 0.5 }}
     >
       <div className="navbar-container">
-        <a href="#" className="logo">
+        <Link to="/" className="logo">
           <div className="logo-icon">
             <span className="logo-yi">Yi</span>
           </div>
           <span className="logo-text">Dinosaur</span>
-        </a>
+        </Link>
 
         <div className={`nav-links ${isMobileOpen ? 'open' : ''}`}>
           {navLinks.map((link, index) => (
-            <motion.a
+            <motion.div
               key={link.name}
-              href={link.href}
-              className="nav-link"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              onClick={() => setIsMobileOpen(false)}
             >
-              {link.name}
-            </motion.a>
+              <Link
+                to={link.to}
+                className="nav-link"
+                onClick={() => setIsMobileOpen(false)}
+              >
+                {link.name}
+              </Link>
+            </motion.div>
           ))}
         </div>
 
